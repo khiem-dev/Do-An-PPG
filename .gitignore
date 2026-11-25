@@ -1,0 +1,21 @@
+﻿# STM32CubeIDE
+firmware/**/Debug/
+firmware/**/Release/
+firmware/**/.settings/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# Dữ liệu lớn (2GB - đồng bộ riêng qua OneDrive/Google Drive)
+data/*
+!data/.gitkeep
+
+# Hệ điều hành & OneDrive
+.DS_Store
+Thumbs.db
+desktop.ini
