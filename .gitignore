@@ -12,7 +12,7 @@ env/
 .ipynb_checkpoints/
 
 # Dữ liệu lớn (2GB - đồng bộ riêng qua OneDrive/Google Drive)
-data/*
+data/public/
 !data/.gitkeep
 
 # Hệ điều hành & OneDrive
