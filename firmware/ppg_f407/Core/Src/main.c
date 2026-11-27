@@ -182,15 +182,18 @@ static SQI_State g_sqi;
 static float g_ppg_bp = 0.0f, g_ppg_nlms = 0.0f;
 
 #define SESS_TOTAL_SAMPLES  6000U   /* 60 s @ 100 Hz */
+#define PREPARE_SECONDS     5U      /* dem nguoc 5s chuan bi truoc khi do */
 #define FINGER_IR_THRESH    50000U  /* nguong nhan biet co ngon tay */
 
 typedef enum {
     STATE_IDLE = 0,
-    STATE_MEASURING = 1,
-    STATE_RESULT = 2
+    STATE_PREPARE = 1,
+    STATE_MEASURING = 2,
+    STATE_RESULT = 3
 } MeasState;
 
 static MeasState g_state = STATE_IDLE;
+static uint32_t g_prep_start_ms = 0;
 static uint32_t g_sess_samples = 0;
 static uint16_t g_finger_cnt = 0;
 static uint16_t g_win_total = 0;
@@ -201,6 +204,14 @@ static float g_hr_all_sum = 0.0f;
 static uint16_t g_hr_all_cnt = 0;
 static int g_res_hr = 0;
 static int g_res_sqi_pct = 0;
+
+static void prepare_start(void)
+{
+    g_prep_start_ms = HAL_GetTick();
+    g_finger_cnt = 0;
+    g_state = STATE_PREPARE;
+    printf("=== CHUAN BI %uS... ===\r\n", (unsigned)PREPARE_SECONDS);
+}
 
 static void session_start(void)
 {
@@ -253,9 +264,8 @@ static void max30102_poll_and_print(void)
 
         if (g_state == STATE_IDLE) {
             if (ir > FINGER_IR_THRESH) {
-                if (++g_finger_cnt >= 30) { /* giu ngon tay ~0.3s thi bat dau do 60s */
-                    g_finger_cnt = 0;
-                    session_start();
+                if (++g_finger_cnt >= 20) { /* giu ngon tay ~0.2s -> dem nguoc 5s chuan bi */
+                    prepare_start();
                 }
             } else {
                 g_finger_cnt = 0;
@@ -427,6 +437,17 @@ static void oled_draw(void)
         return;
     }
 
+    if (g_state == STATE_PREPARE) {
+        uint32_t el = HAL_GetTick() - g_prep_start_ms;
+        unsigned rem = (el < PREPARE_SECONDS * 1000U)
+                       ? (unsigned)(PREPARE_SECONDS - (el / 1000U)) : 0U;
+        oled_text(0, 0, "GET READY...");
+        snprintf(line, sizeof(line), "START IN: %uS", rem);
+        oled_text(0, 18, line);
+        oled_text(0, 36, "HOLD FINGER STILL");
+        return;
+    }
+
     if (g_state == STATE_RESULT) {
         oled_text(0, 0, "DONE 60S RESULT");
         snprintf(line, sizeof(line), "HR AVG: %d BPM", g_res_hr);
@@ -531,16 +552,20 @@ int main(void)
     static uint8_t prev_btn = 0;
     uint32_t now = HAL_GetTick();
 
-    /* Nut USER PA0 (muc cao khi bam): bam de bat dau/do lai 60s */
+    /* Nut USER PA0 (muc cao khi bam): bam de bat dau/do lai 60s (co 5s chuan bi) */
     uint8_t btn = (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_SET) ? 1 : 0;
     if (btn && !prev_btn) {
         if (g_state == STATE_IDLE || g_state == STATE_RESULT) {
-            session_start();
+            prepare_start();
         }
     }
     prev_btn = btn;
 
-    if (now >= next_tick) {
+    if (g_state == STATE_PREPARE) {
+        if (now - g_prep_start_ms >= PREPARE_SECONDS * 1000U) {
+            session_start();
+        }
+    } else if (now >= next_tick) {
         next_tick += 10;                       /* chu ky 10 ms = 100 Hz */
         if (now > next_tick + 10) next_tick = now + 10;
         if (g_state == STATE_MEASURING) {
@@ -554,7 +579,7 @@ int main(void)
     if (oled_ok) {
         static uint32_t t_oled = 0;
         static MeasState last_drawn_state = STATE_RESULT;
-        uint32_t period = (g_state == STATE_MEASURING) ? 1000U : 300U;
+        uint32_t period = (g_state == STATE_MEASURING) ? 1000U : 250U;
         if (g_state != last_drawn_state || (now - t_oled >= period)) {
             t_oled = now;
             last_drawn_state = g_state;
