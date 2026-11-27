@@ -181,6 +181,61 @@ static PPG_NLMS g_nlms;
 static SQI_State g_sqi;
 static float g_ppg_bp = 0.0f, g_ppg_nlms = 0.0f;
 
+#define SESS_TOTAL_SAMPLES  6000U   /* 60 s @ 100 Hz */
+#define FINGER_IR_THRESH    50000U  /* nguong nhan biet co ngon tay */
+
+typedef enum {
+    STATE_IDLE = 0,
+    STATE_MEASURING = 1,
+    STATE_RESULT = 2
+} MeasState;
+
+static MeasState g_state = STATE_IDLE;
+static uint32_t g_sess_samples = 0;
+static uint16_t g_finger_cnt = 0;
+static uint16_t g_win_total = 0;
+static uint16_t g_win_good = 0;
+static float g_hr_good_sum = 0.0f;
+static uint16_t g_hr_good_cnt = 0;
+static float g_hr_all_sum = 0.0f;
+static uint16_t g_hr_all_cnt = 0;
+static int g_res_hr = 0;
+static int g_res_sqi_pct = 0;
+
+static void session_start(void)
+{
+    ppg_nlms_init(&g_nlms);
+    sqi_init(&g_sqi);
+    wave_cnt = 0;
+    g_sess_samples = 0;
+    g_win_total = 0;
+    g_win_good = 0;
+    g_hr_good_sum = 0.0f;
+    g_hr_good_cnt = 0;
+    g_hr_all_sum = 0.0f;
+    g_hr_all_cnt = 0;
+    g_res_hr = 0;
+    g_res_sqi_pct = 0;
+    g_state = STATE_MEASURING;
+    printf("=== BAT DAU DO 60S ===\r\n");
+}
+
+static void session_finish(void)
+{
+    if (g_hr_good_cnt > 0) {
+        g_res_hr = (int)(g_hr_good_sum / (float)g_hr_good_cnt + 0.5f);
+    } else if (g_hr_all_cnt > 0) {
+        g_res_hr = (int)(g_hr_all_sum / (float)g_hr_all_cnt + 0.5f);
+    } else {
+        g_res_hr = (int)(g_nlms.hr_bpm + 0.5f);
+    }
+    g_res_sqi_pct = (g_win_total > 0) ? (int)((100U * g_win_good) / g_win_total) : 0;
+    g_state = STATE_RESULT;
+    printf("=== KET QUA 60S: HR_avg=%d bpm | SQI=%u/%u (%d%% GOOD) | STATUS=%s ===\r\n",
+           g_res_hr, (unsigned)g_win_good, (unsigned)g_win_total, g_res_sqi_pct,
+           (g_res_sqi_pct >= 50) ? "OK" : "RETRY");
+}
+
 static void max30102_poll_and_print(void)
 {
     static uint32_t idx = 0;
@@ -195,14 +250,48 @@ static void max30102_poll_and_print(void)
         uint32_t red = (((uint32_t)b[0] << 16) | ((uint32_t)b[1] << 8) | b[2]) & 0x3FFFF;
         uint32_t ir  = (((uint32_t)b[3] << 16) | ((uint32_t)b[4] << 8) | b[5]) & 0x3FFFF;
         g_red = red; g_ir = ir;
+
+        if (g_state == STATE_IDLE) {
+            if (ir > FINGER_IR_THRESH) {
+                if (++g_finger_cnt >= 30) { /* giu ngon tay ~0.3s thi bat dau do 60s */
+                    g_finger_cnt = 0;
+                    session_start();
+                }
+            } else {
+                g_finger_cnt = 0;
+            }
+            continue;
+        }
+
+        if (g_state != STATE_MEASURING) continue;
+
         g_ppg_nlms = ppg_nlms_step(&g_nlms, (float)ir, g_ax, g_ay, g_az, &g_ppg_bp);
-        sqi_push_sample(&g_sqi, (float)ir, g_ppg_bp, g_ppg_nlms, g_ax, g_ay, g_az);
+        if (sqi_push_sample(&g_sqi, (float)ir, g_ppg_bp, g_ppg_nlms, g_ax, g_ay, g_az)) {
+            g_win_total++;
+            if (g_nlms.hr_bpm >= 40.0f && g_nlms.hr_bpm <= 180.0f) {
+                g_hr_all_sum += g_nlms.hr_bpm;
+                g_hr_all_cnt++;
+            }
+            if (g_sqi.label) {
+                g_win_good++;
+                if (g_nlms.hr_bpm >= 40.0f && g_nlms.hr_bpm <= 180.0f) {
+                    g_hr_good_sum += g_nlms.hr_bpm;
+                    g_hr_good_cnt++;
+                }
+            }
+        }
         if ((idx & 1) == 0) {              /* lay 1 trong 2 mau: song dai ~2.5 s */
             wave[wave_cnt % WAVE_LEN] = ir;
             wave_cnt++;
         }
         printf("%lu,%lu,%lu,%d,%d,%d\r\n", (unsigned long)idx++, (unsigned long)red, (unsigned long)ir,
                g_ax, g_ay, g_az);
+
+        g_sess_samples++;
+        if (g_sess_samples >= SESS_TOTAL_SAMPLES) {
+            session_finish();
+            break;
+        }
     }
 }
 
@@ -221,34 +310,64 @@ static const uint8_t *glyph(char c)
         {0x36,0x49,0x49,0x49,0x36}, {0x06,0x49,0x49,0x29,0x1E}};
     static const uint8_t g_colon[5] = {0x00,0x36,0x36,0x00,0x00};
     static const uint8_t g_dot[5]   = {0x00,0x60,0x60,0x00,0x00};
+    static const uint8_t g_slash[5] = {0x20,0x10,0x08,0x04,0x02};
+    static const uint8_t g_pct[5]   = {0x23,0x13,0x08,0x64,0x62};
+    static const uint8_t g_lpar[5]  = {0x00,0x1C,0x22,0x41,0x00};
+    static const uint8_t g_rpar[5]  = {0x00,0x41,0x22,0x1C,0x00};
     static const uint8_t g_A[5]     = {0x7E,0x11,0x11,0x11,0x7E};
     static const uint8_t g_B[5]     = {0x7F,0x49,0x49,0x49,0x36};
+    static const uint8_t g_C[5]     = {0x3E,0x41,0x41,0x41,0x22};
     static const uint8_t g_D[5]     = {0x7F,0x41,0x41,0x22,0x1C};
+    static const uint8_t g_E[5]     = {0x7F,0x49,0x49,0x49,0x41};
+    static const uint8_t g_F[5]     = {0x7F,0x09,0x09,0x09,0x01};
     static const uint8_t g_G[5]     = {0x3E,0x41,0x49,0x49,0x7A};
     static const uint8_t g_H[5]     = {0x7F,0x08,0x08,0x08,0x7F};
     static const uint8_t g_I[5]     = {0x00,0x41,0x7F,0x41,0x00};
+    static const uint8_t g_K[5]     = {0x7F,0x08,0x14,0x22,0x41};
+    static const uint8_t g_L[5]     = {0x7F,0x40,0x40,0x40,0x40};
+    static const uint8_t g_M[5]     = {0x7F,0x02,0x0C,0x02,0x7F};
+    static const uint8_t g_N[5]     = {0x7F,0x04,0x08,0x10,0x7F};
     static const uint8_t g_O[5]     = {0x3E,0x41,0x41,0x41,0x3E};
+    static const uint8_t g_P[5]     = {0x7F,0x09,0x09,0x09,0x06};
     static const uint8_t g_Q[5]     = {0x3E,0x41,0x51,0x21,0x5E};
     static const uint8_t g_R[5]     = {0x7F,0x09,0x19,0x29,0x46};
     static const uint8_t g_S[5]     = {0x46,0x49,0x49,0x49,0x31};
     static const uint8_t g_T[5]     = {0x01,0x01,0x7F,0x01,0x01};
+    static const uint8_t g_U[5]     = {0x3F,0x40,0x40,0x40,0x3F};
+    static const uint8_t g_V[5]     = {0x1F,0x20,0x40,0x20,0x1F};
     static const uint8_t g_W[5]     = {0x3F,0x40,0x38,0x40,0x3F};
+    static const uint8_t g_Y[5]     = {0x07,0x08,0x70,0x08,0x07};
     static const uint8_t g_blank[5] = {0,0,0,0,0};
     if (c >= '0' && c <= '9') return g_digits[c - '0'];
     if (c == ':') return g_colon;
     if (c == '.') return g_dot;
+    if (c == '/') return g_slash;
+    if (c == '%') return g_pct;
+    if (c == '(') return g_lpar;
+    if (c == ')') return g_rpar;
     if (c == 'A') return g_A;
     if (c == 'B') return g_B;
+    if (c == 'C') return g_C;
     if (c == 'D') return g_D;
+    if (c == 'E') return g_E;
+    if (c == 'F') return g_F;
     if (c == 'G') return g_G;
     if (c == 'H') return g_H;
     if (c == 'I') return g_I;
+    if (c == 'K') return g_K;
+    if (c == 'L') return g_L;
+    if (c == 'M') return g_M;
+    if (c == 'N') return g_N;
     if (c == 'O') return g_O;
+    if (c == 'P') return g_P;
     if (c == 'Q') return g_Q;
     if (c == 'R') return g_R;
     if (c == 'S') return g_S;
     if (c == 'T') return g_T;
+    if (c == 'U') return g_U;
+    if (c == 'V') return g_V;
     if (c == 'W') return g_W;
+    if (c == 'Y') return g_Y;
     return g_blank;
 }
 
@@ -293,17 +412,42 @@ static void oled_text(int x, int y, const char *s)
     }
 }
 
-/* Ve: dong 1 = IR + HR, dong 2 = SQI, phan duoi = song xung IR */
+/* Ve OLED theo 3 trang thai: IDLE / MEASURING (60s) / RESULT */
 static void oled_draw(void)
 {
     char line[24];
     memset(oled_buf, 0, sizeof(oled_buf));
-    snprintf(line, sizeof(line), "IR:%lu HR:%d", (unsigned long)g_ir, (int)(g_nlms.hr_bpm + 0.5f));
+
+    if (g_state == STATE_IDLE) {
+        oled_text(0, 0,  "PPG SQI 60S");
+        oled_text(0, 16, "PUT FINGER ON");
+        oled_text(0, 28, "SENSOR TO START");
+        snprintf(line, sizeof(line), "IR:%lu", (unsigned long)g_ir);
+        oled_text(0, 48, line);
+        return;
+    }
+
+    if (g_state == STATE_RESULT) {
+        oled_text(0, 0, "DONE 60S RESULT");
+        snprintf(line, sizeof(line), "HR AVG: %d BPM", g_res_hr);
+        oled_text(0, 14, line);
+        snprintf(line, sizeof(line), "SQI: %d%% GOOD", g_res_sqi_pct);
+        oled_text(0, 26, line);
+        snprintf(line, sizeof(line), "STATUS: %s", (g_res_sqi_pct >= 50) ? "OK" : "RETRY");
+        oled_text(0, 38, line);
+        oled_text(0, 52, "PRESS BTN: NEW");
+        return;
+    }
+
+    /* STATE_MEASURING */
+    unsigned sec = (unsigned)(g_sess_samples / 100U);
+    snprintf(line, sizeof(line), "REC %02u/60S HR:%d", sec, (int)(g_nlms.hr_bpm + 0.5f));
     oled_text(0, 0, line);
     if (!g_sqi.ready) {
         snprintf(line, sizeof(line), "SQI:WAIT");
     } else {
-        snprintf(line, sizeof(line), "SQI:%s", g_sqi.label ? "GOOD" : "BAD");
+        snprintf(line, sizeof(line), "SQI:%s (%u/%u)", g_sqi.label ? "GOOD" : "BAD",
+                 (unsigned)g_win_good, (unsigned)g_win_total);
     }
     oled_text(0, 8, line);
 
@@ -384,18 +528,36 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     static uint32_t next_tick = 0;
+    static uint8_t prev_btn = 0;
     uint32_t now = HAL_GetTick();
+
+    /* Nut USER PA0 (muc cao khi bam): bam de bat dau/do lai 60s */
+    uint8_t btn = (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_SET) ? 1 : 0;
+    if (btn && !prev_btn) {
+        if (g_state == STATE_IDLE || g_state == STATE_RESULT) {
+            session_start();
+        }
+    }
+    prev_btn = btn;
+
     if (now >= next_tick) {
         next_tick += 10;                       /* chu ky 10 ms = 100 Hz */
-        if (now > next_tick + 10) next_tick = now + 10;   /* bi tre (vd. dang ve OLED): dong bo lai */
-        mpu6050_read();                        /* gia toc ngay truoc khi doc FIFO PPG */
-        max30102_poll_and_print();
+        if (now > next_tick + 10) next_tick = now + 10;
+        if (g_state == STATE_MEASURING) {
+            mpu6050_read();                    /* gia toc ngay truoc khi doc FIFO PPG */
+            max30102_poll_and_print();
+        } else if (g_state == STATE_IDLE) {
+            max30102_poll_and_print();         /* kiem tra dat ngon tay */
+        }
     }
 #if USE_OLED
     if (oled_ok) {
         static uint32_t t_oled = 0;
-        if (now - t_oled >= 500) {             /* ve OLED moi 0.5 s de it lam tre viec lay mau */
+        static MeasState last_drawn_state = STATE_RESULT;
+        uint32_t period = (g_state == STATE_MEASURING) ? 1000U : 300U;
+        if (g_state != last_drawn_state || (now - t_oled >= period)) {
             t_oled = now;
+            last_drawn_state = g_state;
             oled_draw();
             oled_update();
         }
@@ -530,7 +692,11 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
-
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
