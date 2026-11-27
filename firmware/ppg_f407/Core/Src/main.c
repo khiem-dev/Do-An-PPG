@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
+#include "dsp_nlms.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -175,6 +176,8 @@ static void mpu6050_read(void)
 static uint32_t g_red = 0, g_ir = 0;
 static uint32_t wave[WAVE_LEN];
 static uint32_t wave_cnt = 0;
+static PPG_NLMS g_nlms;
+static float g_ppg_bp = 0.0f, g_ppg_nlms = 0.0f;
 
 static void max30102_poll_and_print(void)
 {
@@ -190,6 +193,7 @@ static void max30102_poll_and_print(void)
         uint32_t red = (((uint32_t)b[0] << 16) | ((uint32_t)b[1] << 8) | b[2]) & 0x3FFFF;
         uint32_t ir  = (((uint32_t)b[3] << 16) | ((uint32_t)b[4] << 8) | b[5]) & 0x3FFFF;
         g_red = red; g_ir = ir;
+        g_ppg_nlms = ppg_nlms_step(&g_nlms, (float)ir, g_ax, g_ay, g_az, &g_ppg_bp);
         if ((idx & 1) == 0) {              /* lay 1 trong 2 mau: song dai ~2.5 s */
             wave[wave_cnt % WAVE_LEN] = ir;
             wave_cnt++;
@@ -269,7 +273,7 @@ static void oled_draw(void)
 {
     char line[24];
     memset(oled_buf, 0, sizeof(oled_buf));
-    snprintf(line, sizeof(line), "IR:%lu", (unsigned long)g_ir);
+    snprintf(line, sizeof(line), "IR:%lu HR:%d", (unsigned long)g_ir, (int)(g_nlms.hr_bpm + 0.5f));
     oled_text(0, 0, line);
     snprintf(line, sizeof(line), "R:%lu", (unsigned long)g_red);
     oled_text(0, 8, line);
@@ -328,6 +332,7 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   setvbuf(stdout, NULL, _IONBF, 0);        /* in ra UART ngay, khong dem */
+  ppg_nlms_init(&g_nlms);
   HAL_Delay(500);
   i2c_scan();
   oled_ok = (oled_init() == 0);
