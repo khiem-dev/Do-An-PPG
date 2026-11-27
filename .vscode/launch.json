@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/giakhiem0207/Documents/Do-An-PPG/firmware/ppg_f407/Core/Src",
+      "program": "/Users/giakhiem0207/Documents/Do-An-PPG/firmware/ppg_f407/Core/Src/build/Debug/outDebug"
+    }
+  ]
+}

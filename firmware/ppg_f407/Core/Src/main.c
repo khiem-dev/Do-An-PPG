@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "dsp_nlms.h"
+#include "sqi_model.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -177,6 +178,7 @@ static uint32_t g_red = 0, g_ir = 0;
 static uint32_t wave[WAVE_LEN];
 static uint32_t wave_cnt = 0;
 static PPG_NLMS g_nlms;
+static SQI_State g_sqi;
 static float g_ppg_bp = 0.0f, g_ppg_nlms = 0.0f;
 
 static void max30102_poll_and_print(void)
@@ -194,6 +196,7 @@ static void max30102_poll_and_print(void)
         uint32_t ir  = (((uint32_t)b[3] << 16) | ((uint32_t)b[4] << 8) | b[5]) & 0x3FFFF;
         g_red = red; g_ir = ir;
         g_ppg_nlms = ppg_nlms_step(&g_nlms, (float)ir, g_ax, g_ay, g_az, &g_ppg_bp);
+        sqi_push_sample(&g_sqi, (float)ir, g_ppg_bp, g_ppg_nlms, g_ax, g_ay, g_az);
         if ((idx & 1) == 0) {              /* lay 1 trong 2 mau: song dai ~2.5 s */
             wave[wave_cnt % WAVE_LEN] = ir;
             wave_cnt++;
@@ -217,13 +220,35 @@ static const uint8_t *glyph(char c)
         {0x3C,0x4A,0x49,0x49,0x30}, {0x01,0x71,0x09,0x05,0x03},
         {0x36,0x49,0x49,0x49,0x36}, {0x06,0x49,0x49,0x29,0x1E}};
     static const uint8_t g_colon[5] = {0x00,0x36,0x36,0x00,0x00};
+    static const uint8_t g_dot[5]   = {0x00,0x60,0x60,0x00,0x00};
+    static const uint8_t g_A[5]     = {0x7E,0x11,0x11,0x11,0x7E};
+    static const uint8_t g_B[5]     = {0x7F,0x49,0x49,0x49,0x36};
+    static const uint8_t g_D[5]     = {0x7F,0x41,0x41,0x22,0x1C};
+    static const uint8_t g_G[5]     = {0x3E,0x41,0x49,0x49,0x7A};
+    static const uint8_t g_H[5]     = {0x7F,0x08,0x08,0x08,0x7F};
     static const uint8_t g_I[5]     = {0x00,0x41,0x7F,0x41,0x00};
+    static const uint8_t g_O[5]     = {0x3E,0x41,0x41,0x41,0x3E};
+    static const uint8_t g_Q[5]     = {0x3E,0x41,0x51,0x21,0x5E};
     static const uint8_t g_R[5]     = {0x7F,0x09,0x19,0x29,0x46};
+    static const uint8_t g_S[5]     = {0x46,0x49,0x49,0x49,0x31};
+    static const uint8_t g_T[5]     = {0x01,0x01,0x7F,0x01,0x01};
+    static const uint8_t g_W[5]     = {0x3F,0x40,0x38,0x40,0x3F};
     static const uint8_t g_blank[5] = {0,0,0,0,0};
     if (c >= '0' && c <= '9') return g_digits[c - '0'];
     if (c == ':') return g_colon;
+    if (c == '.') return g_dot;
+    if (c == 'A') return g_A;
+    if (c == 'B') return g_B;
+    if (c == 'D') return g_D;
+    if (c == 'G') return g_G;
+    if (c == 'H') return g_H;
     if (c == 'I') return g_I;
+    if (c == 'O') return g_O;
+    if (c == 'Q') return g_Q;
     if (c == 'R') return g_R;
+    if (c == 'S') return g_S;
+    if (c == 'T') return g_T;
+    if (c == 'W') return g_W;
     return g_blank;
 }
 
@@ -268,14 +293,18 @@ static void oled_text(int x, int y, const char *s)
     }
 }
 
-/* Ve: dong 1 = IR, dong 2 = Red, phan duoi = song xung IR */
+/* Ve: dong 1 = IR + HR, dong 2 = SQI, phan duoi = song xung IR */
 static void oled_draw(void)
 {
     char line[24];
     memset(oled_buf, 0, sizeof(oled_buf));
     snprintf(line, sizeof(line), "IR:%lu HR:%d", (unsigned long)g_ir, (int)(g_nlms.hr_bpm + 0.5f));
     oled_text(0, 0, line);
-    snprintf(line, sizeof(line), "R:%lu", (unsigned long)g_red);
+    if (!g_sqi.ready) {
+        snprintf(line, sizeof(line), "SQI:WAIT");
+    } else {
+        snprintf(line, sizeof(line), "SQI:%s", g_sqi.label ? "GOOD" : "BAD");
+    }
     oled_text(0, 8, line);
 
     int n = (wave_cnt < WAVE_LEN) ? (int)wave_cnt : WAVE_LEN;
@@ -333,6 +362,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   setvbuf(stdout, NULL, _IONBF, 0);        /* in ra UART ngay, khong dem */
   ppg_nlms_init(&g_nlms);
+  sqi_init(&g_sqi);
   HAL_Delay(500);
   i2c_scan();
   oled_ok = (oled_init() == 0);
