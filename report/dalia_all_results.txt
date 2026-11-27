@@ -1,0 +1,207 @@
+=== ../data/public/PPG_FieldStudy/S1/S1.pkl ===
+Sai so HR tuyet doi trung binh (MAE, bpm)
+  Dinh pho tho  : truoc NLMS 10.0 | sau NLMS 9.9
+  Co theo doi HR: truoc NLMS 9.9 | sau NLMS 8.8
+Theo tung hoat dong (co theo doi HR):  truoc -> sau NLMS  [so cua so]
+  1 ngoi                     6.1 ->   6.4   [350]
+  2 len/xuong cau thang     49.6 ->  27.2   [143]
+  3 da bi lac               16.8 ->  19.6   [173]
+  4 dap xe                  10.5 ->   8.0   [206]
+  5 lai xe                   7.8 ->   7.7   [444]
+  6 nghi trua                7.6 ->   8.4   [1177]
+  7 di bo                   13.2 ->   9.1   [377]
+  8 lam viec                 4.5 ->   4.5   [594]
+Da luu nlms_result.png
+=== ../data/public/PPG_FieldStudy/S2/S2.pkl ===
+Sai so HR tuyet doi trung binh (MAE, bpm)
+  Dinh pho tho  : truoc NLMS 12.8 | sau NLMS 12.2
+  Co theo doi HR: truoc NLMS 10.6 | sau NLMS 11.5
+Theo tung hoat dong (co theo doi HR):  truoc -> sau NLMS  [so cua so]
+  1 ngoi                     2.8 ->   2.7   [300]
+  2 len/xuong cau thang     43.7 ->  53.9   [133]
+  3 da bi lac               24.9 ->  24.7   [152]
+  4 dap xe                  33.4 ->  37.8   [194]
+  5 lai xe                   7.8 ->   8.6   [460]
+  6 nghi trua                5.3 ->   4.9   [610]
+  7 di bo                    4.5 ->   8.4   [345]
+  8 lam viec                 7.3 ->   6.0   [645]
+Da luu nlms_result.png
+=== ../data/public/PPG_FieldStudy/S3/S3.pkl ===
+Sai so HR tuyet doi trung binh (MAE, bpm)
+  Dinh pho tho  : truoc NLMS 15.5 | sau NLMS 13.0
+  Co theo doi HR: truoc NLMS 13.2 | sau NLMS 9.2
+Theo tung hoat dong (co theo doi HR):  truoc -> sau NLMS  [so cua so]
+  1 ngoi                     2.3 ->   2.3   [300]
+  2 len/xuong cau thang     48.0 ->  21.2   [218]
+  3 da bi lac               20.9 ->  11.9   [146]
+  4 dap xe                  25.8 ->  27.9   [189]
+  5 lai xe                   8.5 ->   7.8   [455]
+  6 nghi trua                7.8 ->   8.8   [1080]
+  7 di bo                   24.0 ->   4.9   [369]
+  8 lam viec                 6.8 ->   6.3   [605]
+Da luu nlms_result.png
+=== ../data/public/PPG_FieldStudy/S4/S4.pkl ===
+Sai so HR tuyet doi trung binh (MAE, bpm)
+  Dinh pho tho  : truoc NLMS 17.4 | sau NLMS 17.5
+  Co theo doi HR: truoc NLMS 15.3 | sau NLMS 16.7
+Theo tung hoat dong (co theo doi HR):  truoc -> sau NLMS  [so cua so]
+  1 ngoi                     3.2 ->   2.8   [285]
+  2 len/xuong cau thang     42.9 ->  42.3   [262]
+  3 da bi lac               20.7 ->  19.7   [164]
+  4 dap xe                  21.5 ->  27.9   [237]
+  5 lai xe                  13.0 ->  13.2   [504]
+  6 nghi trua               12.2 ->  13.9   [947]
+  7 di bo                   23.8 ->  28.2   [297]
+  8 lam viec                 8.1 ->   8.7   [620]
+Da luu nlms_result.png
+=== ../data/public/PPG_FieldStudy/S5/S5.pkl ===
+Sai so HR tuyet doi trung binh (MAE, bpm)
+  Dinh pho tho  : truoc NLMS 35.8 | sau NLMS 34.8
+  Co theo doi HR: truoc NLMS 24.0 | sau NLMS 19.7
+Theo tung hoat dong (co theo doi HR):  truoc -> sau NLMS  [so cua so]
+  1 ngoi                     1.8 ->   1.8   [300]
+  2 len/xuong cau thang     64.4 ->   2.0   [233]
+  3 da bi lac               71.5 ->  69.7   [145]
+  4 dap xe                  80.9 ->  34.1   [216]
+  5 lai xe                   8.4 ->   6.9   [415]
+  6 nghi trua                9.8 ->  14.1   [1128]
+  7 di bo                   58.2 ->  68.8   [295]
+  8 lam viec                 8.9 ->  13.8   [635]
+Da luu nlms_result.png
+=== ../data/public/PPG_FieldStudy/S6/S6.pkl ===
+Sai so HR tuyet doi trung binh (MAE, bpm)
+  Dinh pho tho  : truoc NLMS 20.3 | sau NLMS 19.3
+  Co theo doi HR: truoc NLMS 8.1 | sau NLMS 10.3
+Theo tung hoat dong (co theo doi HR):  truoc -> sau NLMS  [so cua so]
+  1 ngoi                     1.4 ->   1.4   [317]
+  2 len/xuong cau thang      1.3 ->  23.1   [215]
+  3 da bi lac               50.1 ->  39.5   [155]
+  4 dap xe                   0.8 ->   0.9   [266]
+  5 lai xe                   6.3 ->   6.7   [524]
+Da luu nlms_result.png
+=== ../data/public/PPG_FieldStudy/S7/S7.pkl ===
+Sai so HR tuyet doi trung binh (MAE, bpm)
+  Dinh pho tho  : truoc NLMS 8.0 | sau NLMS 6.1
+  Co theo doi HR: truoc NLMS 6.0 | sau NLMS 4.1
+Theo tung hoat dong (co theo doi HR):  truoc -> sau NLMS  [so cua so]
+  1 ngoi                     1.3 ->   1.3   [309]
+  2 len/xuong cau thang     32.2 ->   3.2   [203]
+  3 da bi lac               11.3 ->   7.9   [137]
+  4 dap xe                   2.8 ->   2.8   [251]
+  5 lai xe                   3.7 ->   3.9   [518]
+  6 nghi trua                5.1 ->   5.2   [1212]
+  7 di bo                    4.7 ->   3.1   [354]
+  8 lam viec                 4.2 ->   3.9   [588]
+Da luu nlms_result.png
+=== ../data/public/PPG_FieldStudy/S8/S8.pkl ===
+Sai so HR tuyet doi trung binh (MAE, bpm)
+  Dinh pho tho  : truoc NLMS 13.6 | sau NLMS 13.6
+  Co theo doi HR: truoc NLMS 11.1 | sau NLMS 12.5
+Theo tung hoat dong (co theo doi HR):  truoc -> sau NLMS  [so cua so]
+  1 ngoi                     5.6 ->   5.8   [300]
+  2 len/xuong cau thang     31.3 ->  31.4   [206]
+  3 da bi lac               16.5 ->  19.2   [162]
+  4 dap xe                  12.3 ->  18.5   [210]
+  5 lai xe                   9.9 ->  11.2   [385]
+  6 nghi trua               10.8 ->  12.8   [900]
+  7 di bo                   17.1 ->  16.0   [240]
+  8 lam viec                 3.8 ->   4.3   [596]
+Da luu nlms_result.png
+=== ../data/public/PPG_FieldStudy/S9/S9.pkl ===
+Sai so HR tuyet doi trung binh (MAE, bpm)
+  Dinh pho tho  : truoc NLMS 21.8 | sau NLMS 20.9
+  Co theo doi HR: truoc NLMS 19.2 | sau NLMS 18.5
+Theo tung hoat dong (co theo doi HR):  truoc -> sau NLMS  [so cua so]
+  1 ngoi                     2.8 ->   3.2   [300]
+  2 len/xuong cau thang     43.1 ->  33.3   [241]
+  3 da bi lac               18.0 ->  22.8   [142]
+  4 dap xe                  42.3 ->  32.0   [277]
+  5 lai xe                  13.9 ->  14.7   [478]
+  6 nghi trua               14.0 ->  14.1   [921]
+  7 di bo                   36.4 ->  46.1   [295]
+  8 lam viec                11.7 ->   9.7   [622]
+Da luu nlms_result.png
+=== ../data/public/PPG_FieldStudy/S10/S10.pkl ===
+Sai so HR tuyet doi trung binh (MAE, bpm)
+  Dinh pho tho  : truoc NLMS 10.8 | sau NLMS 9.7
+  Co theo doi HR: truoc NLMS 7.2 | sau NLMS 6.6
+Theo tung hoat dong (co theo doi HR):  truoc -> sau NLMS  [so cua so]
+  1 ngoi                     1.4 ->   1.3   [299]
+  2 len/xuong cau thang     20.9 ->  27.0   [233]
+  3 da bi lac               18.3 ->  13.0   [153]
+  4 dap xe                  42.5 ->  31.4   [244]
+  5 lai xe                   3.2 ->   2.3   [469]
+  6 nghi trua                2.3 ->   2.5   [1042]
+  7 di bo                    3.5 ->   3.8   [541]
+  8 lam viec                 2.4 ->   2.1   [573]
+Da luu nlms_result.png
+=== ../data/public/PPG_FieldStudy/S11/S11.pkl ===
+Sai so HR tuyet doi trung binh (MAE, bpm)
+  Dinh pho tho  : truoc NLMS 20.3 | sau NLMS 19.4
+  Co theo doi HR: truoc NLMS 17.3 | sau NLMS 15.0
+Theo tung hoat dong (co theo doi HR):  truoc -> sau NLMS  [so cua so]
+  1 ngoi                     2.2 ->   2.1   [300]
+  2 len/xuong cau thang     69.9 ->  60.4   [228]
+  3 da bi lac               25.7 ->  26.3   [162]
+  4 dap xe                  10.8 ->   1.2   [245]
+  5 lai xe                   4.4 ->   4.2   [430]
+  6 nghi trua                9.3 ->   7.7   [1204]
+  7 di bo                   64.4 ->  60.2   [327]
+  8 lam viec                 4.9 ->   4.9   [610]
+Da luu nlms_result.png
+=== ../data/public/PPG_FieldStudy/S12/S12.pkl ===
+Sai so HR tuyet doi trung binh (MAE, bpm)
+  Dinh pho tho  : truoc NLMS 10.3 | sau NLMS 10.3
+  Co theo doi HR: truoc NLMS 10.2 | sau NLMS 9.5
+Theo tung hoat dong (co theo doi HR):  truoc -> sau NLMS  [so cua so]
+  1 ngoi                    12.8 ->  13.2   [301]
+  2 len/xuong cau thang     22.3 ->  20.2   [242]
+  3 da bi lac               16.9 ->  15.0   [140]
+  4 dap xe                  13.9 ->   7.7   [240]
+  5 lai xe                   6.1 ->   6.2   [445]
+  6 nghi trua                9.6 ->   8.9   [730]
+  7 di bo                   14.9 ->  16.8   [265]
+  8 lam viec                 2.4 ->   2.5   [597]
+Da luu nlms_result.png
+=== ../data/public/PPG_FieldStudy/S13/S13.pkl ===
+Sai so HR tuyet doi trung binh (MAE, bpm)
+  Dinh pho tho  : truoc NLMS 8.7 | sau NLMS 8.9
+  Co theo doi HR: truoc NLMS 7.0 | sau NLMS 4.8
+Theo tung hoat dong (co theo doi HR):  truoc -> sau NLMS  [so cua so]
+  1 ngoi                     1.2 ->   1.2   [302]
+  2 len/xuong cau thang     28.2 ->   4.2   [248]
+  3 da bi lac               16.5 ->  16.4   [145]
+  4 dap xe                   1.6 ->   1.6   [249]
+  5 lai xe                   5.8 ->   5.3   [449]
+  6 nghi trua                7.9 ->   6.8   [1014]
+  7 di bo                    4.3 ->   4.0   [355]
+  8 lam viec                 2.4 ->   2.4   [612]
+Da luu nlms_result.png
+=== ../data/public/PPG_FieldStudy/S14/S14.pkl ===
+Sai so HR tuyet doi trung binh (MAE, bpm)
+  Dinh pho tho  : truoc NLMS 12.1 | sau NLMS 11.8
+  Co theo doi HR: truoc NLMS 8.0 | sau NLMS 9.0
+Theo tung hoat dong (co theo doi HR):  truoc -> sau NLMS  [so cua so]
+  1 ngoi                     0.8 ->   0.8   [304]
+  2 len/xuong cau thang      8.7 ->   4.1   [228]
+  3 da bi lac                8.4 ->   9.2   [163]
+  4 dap xe                   1.2 ->   1.2   [251]
+  5 lai xe                   5.1 ->   7.6   [477]
+  6 nghi trua                8.9 ->   9.4   [865]
+  7 di bo                   26.1 ->  34.4   [307]
+  8 lam viec                 6.1 ->   5.6   [602]
+Da luu nlms_result.png
+=== ../data/public/PPG_FieldStudy/S15/S15.pkl ===
+Sai so HR tuyet doi trung binh (MAE, bpm)
+  Dinh pho tho  : truoc NLMS 11.1 | sau NLMS 10.9
+  Co theo doi HR: truoc NLMS 10.4 | sau NLMS 9.7
+Theo tung hoat dong (co theo doi HR):  truoc -> sau NLMS  [so cua so]
+  1 ngoi                     1.8 ->   1.9   [306]
+  2 len/xuong cau thang     40.5 ->  43.7   [209]
+  3 da bi lac               23.0 ->  23.8   [177]
+  4 dap xe                  19.8 ->  19.2   [203]
+  5 lai xe                   7.2 ->   6.8   [393]
+  6 nghi trua                5.4 ->   5.4   [720]
+  7 di bo                   13.9 ->   6.2   [329]
+  8 lam viec                 3.7 ->   3.5   [602]
+Da luu nlms_result.png

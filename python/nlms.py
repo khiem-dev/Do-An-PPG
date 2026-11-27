@@ -82,16 +82,23 @@ def synth_motion_ppg(fs=64, dur=120, bpm=72, seed=1):
     return t, clean, ppg, acc
 
 
-def load_dalia(pkl_path):
-    """Doc 1 file S?.pkl cua PPG-DaLiA (chi mo file tai tu nguon chinh thuc)."""
-    with open(pkl_path, "rb") as f:
-        data = pickle.load(f, encoding="latin1")
-    bvp = np.asarray(data["signal"]["wrist"]["BVP"], float).ravel()       # 64 Hz
-    acc = np.asarray(data["signal"]["wrist"]["ACC"], float)               # 32 Hz, (N,3)
-    acc = resample_poly(acc, 2, 1, axis=0)[: len(bvp)]                    # len len 64 Hz
-    label = np.asarray(data["label"], float).ravel()                     # HR chuan moi 2 s
-    act = data.get("activity")
-    act = None if act is None else np.asarray(act).ravel().astype(int)
+def load_dalia(path):
+    """Doc S?.pkl goc cua PPG-DaLiA, hoac S?.npz da trich bang extract_dalia_wrist.py."""
+    if str(path).lower().endswith(".npz"):
+        z = np.load(path)
+        bvp = z["bvp"].astype(float)
+        acc = z["acc"].astype(float)
+        label = z["label"].astype(float)
+        act = z["activity"].astype(int) if "activity" in z.files else None
+    else:
+        with open(path, "rb") as f:                   # chi mo file tai tu nguon chinh thuc
+            data = pickle.load(f, encoding="latin1")
+        bvp = np.asarray(data["signal"]["wrist"]["BVP"], float).ravel()       # 64 Hz
+        acc = np.asarray(data["signal"]["wrist"]["ACC"], float)               # 32 Hz, (N,3)
+        label = np.asarray(data["label"], float).ravel()                     # HR chuan moi 2 s
+        act = data.get("activity")
+        act = None if act is None else np.asarray(act).ravel().astype(int)
+    acc = resample_poly(acc, 2, 1, axis=0)[: len(bvp)]                        # len len 64 Hz
     return bvp, acc, label, act
 
 

@@ -59,7 +59,7 @@ def main():
             if last_idx is not None and idx != last_idx + 1:
                 dropped += abs(idx - last_idx - 1)
             last_idx = idx
-            rows.append((len(rows), red, ir, *acc))
+            rows.append((idx - first_idx, red, ir, *acc))
     finally:
         ser.close()
 
